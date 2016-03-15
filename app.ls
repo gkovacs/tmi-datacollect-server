@@ -50,6 +50,17 @@ app.post '/addlog', (req, res) ->
   addlog user, data, ->
     res.send 'done'
 
+app.post '/addmlog', (req, res) ->
+  data = req.body
+  data = JSON.parse data
+  {user} = data
+  if not user?
+    res.send 'need user param'
+    return
+  data.ip = req.ip
+  addmlog user, data, ->
+    res.send 'done'
+
 app.post '/addhist', (req, res) ->
   data = req.body
   data = JSON.parse data
@@ -79,6 +90,17 @@ get-collection = (collection_name, callback) ->
 
 addlog = (user, data, callback) ->
   get-collection "logs_#{user}", (collection, db) ->
+    collection.insert data, (err, docs) ->
+      if err?
+        console.log 'error upon insertion'
+        console.log err
+      else
+        if callback?
+          callback()
+      db.close()
+
+addmlog = (user, data, callback) ->
+  get-collection "mlogs_#{user}", (collection, db) ->
     collection.insert data, (err, docs) ->
       if err?
         console.log 'error upon insertion'
